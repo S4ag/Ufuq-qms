@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
-import { getAuthSession } from "../../lib/auth";
-import { prisma } from "../../lib/prisma";
+import { getAuthSession } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
 
 export default async function AdminPage() {const session = await getAuthSession();if (!session) redirect("/login");if ((session.user as any).role !== "ADMIN") redirect("/me");
 
