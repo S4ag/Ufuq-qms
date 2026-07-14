@@ -1,1 +1,173 @@
+generator client {
+provider = "prisma-client-js"
+}
 
+datasource db {
+provider = "postgresql"
+url      = env("DATABASE_URL")
+}
+
+enum Role {
+ADMIN
+EMPLOYEE
+}
+
+enum Status {
+ACTIVE
+DISABLED
+}
+
+enum VisitFrequency {
+WEEKLY
+BIWEEKLY
+MONTHLY
+}
+
+enum VisitStatus {
+SCHEDULED
+IN_PROGRESS
+COMPLETED
+MISSED
+CANCELLED
+}
+
+enum AuditStatus {
+PENDING
+APPROVED
+REJECTED
+}
+
+model User {
+id           String   @id @default(cuid())
+name         String
+employeeId   String   @unique
+email        String   @unique
+phone        String
+region       String
+passwordHash String
+role         Role     @default(EMPLOYEE)
+status       Status   @default(ACTIVE)
+assignments  EmployeeBranch[]
+createdAt    DateTime @default(now())
+updatedAt    DateTime @updatedAt
+}
+
+model Branch {
+id             String           @id @default(cuid())
+name           String
+city           String
+manager        String
+phone          String
+visitFrequency VisitFrequency
+status         Status          @default(ACTIVE)
+assignments    EmployeeBranch[]
+createdAt      DateTime        @default(now())
+updatedAt      DateTime        @updatedAt
+@@unique([name, city])
+}
+
+model EmployeeBranch {
+id         String  @id @default(cuid())
+userId     String
+branchId   String
+assignedAt DateTime @default(now())
+
+user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+branch Branch @relation(fields: [branchId], references: [id], onDelete: Cascade)
+
+@@unique([userId, branchId])
+}
+
+model Visit {
+id           String      @id @default(cuid())
+visitCode    String      @unique
+date         DateTime
+startTime    DateTime?
+endTime      DateTime?
+status       VisitStatus @default(SCHEDULED)
+notes        String?
+region       String
+employeeId   String
+branchId     String
+
+employee     User        @relation(fields: [employeeId], references: [id])
+branch       Branch      @relation(fields: [branchId], references: [id])
+photos       VisitPhoto[]
+createdAt    DateTime    @default(now())
+updatedAt    DateTime    @updatedAt
+
+@@index([date])
+@@index([employeeId, date])
+@@index([branchId, date])
+@@index([region, date])
+}
+
+model VisitPhoto {
+id        String   @id @default(cuid())
+visitId   String
+url       String
+thumbUrl  String
+createdAt DateTime @default(now())
+
+visit Visit @relation(fields: [visitId], references: [id], onDelete: Cascade)
+}
+
+model Activity {
+id        String   @id @default(cuid())
+actorId   String?
+type      String
+message   String
+refType   String?
+refId     String?
+createdAt DateTime @default(now())
+
+actor User? @relation(fields: [actorId], references: [id])
+@@index([createdAt])
+}
+
+model Audit {
+id                 String      @id @default(cuid())
+visitId            String      @unique
+employeeId         String
+branchId           String
+status             AuditStatus @default(PENDING)
+adminComment       String?
+
+espressoMachine    Int
+grinder            Int
+recipeVerification Int
+extractionTime     Int
+milkQuality        Int
+waterTDS           Int
+grinderCalibration Int
+cleanliness        Int
+barWorkflow        Int
+customerArea       Int
+
+notes              String?
+correctiveActions  String?
+
+totalScore         Int
+
+createdAt          DateTime    @default(now())
+updatedAt          DateTime    @updatedAt
+
+visit    Visit  @relation(fields: [visitId], references: [id], onDelete: Cascade)
+employee User   @relation(fields: [employeeId], references: [id])
+branch   Branch @relation(fields: [branchId], references: [id])
+photos   AuditPhoto[]
+
+@@index([employeeId])
+@@index([branchId])
+@@index([createdAt])
+}
+
+model AuditPhoto {
+id        String   @id @default(cuid())
+auditId   String
+url       String
+thumbUrl  String
+createdAt DateTime @default(now())
+
+audit Audit @relation(fields: [auditId], references: [id], onDelete: Cascade)
+}
