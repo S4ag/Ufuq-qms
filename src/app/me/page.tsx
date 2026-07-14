@@ -1,0 +1,1 @@
+export default function Me() { return <div style={{ padding: 24 }}>صفحة الموظف (مؤقتة) — تم تسجيل الدخول بنجاح.</div>; }

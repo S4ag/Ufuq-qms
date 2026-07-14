@@ -1,0 +1,1 @@
+export default function Admin() { return <div style={{ padding: 24 }}>لوحة الإدارة (مؤقتة) — تم تسجيل الدخول بنجاح.</div>; }
