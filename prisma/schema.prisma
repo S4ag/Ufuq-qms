@@ -38,19 +38,23 @@ REJECTED
 }
 
 model User {
-id           String   @id @default(cuid())
+id           String    @id @default(cuid())
 name         String
-employeeId   String   @unique
-email        String   @unique
+employeeId   String    @unique
+email        String    @unique
 phone        String
 region       String
 passwordHash String
-role         Role     @default(EMPLOYEE)
-status       Status   @default(ACTIVE)
+role         Role      @default(EMPLOYEE)
+status       Status    @default(ACTIVE)
+
 assignments  EmployeeBranch[]
-visits       Visit[]  @relation(name: "UserVisits")
-createdAt    DateTime @default(now())
-updatedAt    DateTime @updatedAt
+visits       Visit[]         @relation(name: "UserVisits")
+activities   Activity[]      @relation(name: "UserActivities")
+audits       Audit[]         @relation(name: "UserAudits")
+
+createdAt    DateTime  @default(now())
+updatedAt    DateTime  @updatedAt
 }
 
 model Branch {
@@ -60,16 +64,20 @@ city           String
 manager        String
 phone          String
 visitFrequency VisitFrequency
-status         Status          @default(ACTIVE)
+status         Status           @default(ACTIVE)
+
 assignments    EmployeeBranch[]
-visits         Visit[]         @relation(name: "BranchVisits")
-createdAt      DateTime        @default(now())
-updatedAt      DateTime        @updatedAt
+visits         Visit[]          @relation(name: "BranchVisits")
+audits         Audit[]          @relation(name: "BranchAudits")
+
+createdAt      DateTime         @default(now())
+updatedAt      DateTime         @updatedAt
+
 @@unique([name, city])
 }
 
 model EmployeeBranch {
-id         String  @id @default(cuid())
+id         String   @id @default(cuid())
 userId     String
 branchId   String
 assignedAt DateTime @default(now())
@@ -95,6 +103,8 @@ branchId     String
 employee     User        @relation(name: "UserVisits",   fields: [employeeId], references: [id])
 branch       Branch      @relation(name: "BranchVisits", fields: [branchId],  references: [id])
 photos       VisitPhoto[]
+audit        Audit?      @relation(name: "VisitAudit")
+
 createdAt    DateTime    @default(now())
 updatedAt    DateTime    @updatedAt
 
@@ -123,7 +133,8 @@ refType   String?
 refId     String?
 createdAt DateTime @default(now())
 
-actor User? @relation(fields: [actorId], references: [id])
+actor User? @relation(name: "UserActivities", fields: [actorId], references: [id])
+
 @@index([createdAt])
 }
 
@@ -154,9 +165,9 @@ totalScore         Int
 createdAt          DateTime    @default(now())
 updatedAt          DateTime    @updatedAt
 
-visit    Visit  @relation(fields: [visitId], references: [id], onDelete: Cascade)
-employee User   @relation(fields: [employeeId], references: [id])
-branch   Branch @relation(fields: [branchId], references: [id])
+visit    Visit  @relation(name: "VisitAudit",  fields: [visitId],    references: [id], onDelete: Cascade)
+employee User   @relation(name: "UserAudits",  fields: [employeeId], references: [id])
+branch   Branch @relation(name: "BranchAudits",fields: [branchId],   references: [id])
 photos   AuditPhoto[]
 
 @@index([employeeId])
