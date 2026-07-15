@@ -1,13 +1,5 @@
-import { redirect } from "next/navigation";
 import { getAuthSession } from "../lib/auth";
+import { redirect } from "next/navigation";
 
-export default async function MePage() {const session = await getAuthSession();if (!session) redirect("/login");//إن كان مديراً, حوّله للوحة الإدارة if ((session.user as any).role === "ADMIN") redirect("/admin");
-
-const user = await prisma.user.findUnique({where: { id: (session.user as any).id },include: { assignments: { include: { branch: true } } }});
-
-return (<div style={{ padding: 24, fontFamily: "system-ui, sans-serif", lineHeight: 1.6 }}><h1 style={{ fontSize: 22, fontWeight: 700, marginBottom: 12 }}>بياناتي</h1><div style={{ display: "grid", gap: 12, gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", marginBottom: 16 }}><div style={{ border: "1px solid #e5e7eb", borderRadius: 8, padding: 12 }}><div style={{ color: "#6b7280", fontSize: 12 }}>الاسم</div><div style={{ fontWeight: 600 }}>{user?.name}</div></div><div style={{ border: "1px solid #e5e7eb", borderRadius: 8, padding: 12 }}><div style={{ color: "#6b7280", fontSize: 12 }}>رقم الموظف</div><div style={{ fontWeight: 600 }}>{user?.employeeId}</div></div><div style={{ border: "1px solid #e5e7eb", borderRadius: 8, padding: 12 }}><div style={{ color: "#6b7280", fontSize: 12 }}>البريد</div><div style={{ fontWeight: 600 }}>{user?.email}</div></div><div style={{ border: "1px solid #e5e7eb", borderRadius: 8, padding: 12 }}><div style={{ color: "#6b7280", fontSize: 12 }}>الهاتف</div><div style={{ fontWeight: 600 }}>{user?.phone}</div></div><div style={{ border: "1px solid #e5e7eb", borderRadius: 8, padding: 12 }}><div style={{ color: "#6b7280", fontSize: 12 }}>المنطقة</div><div style={{ fontWeight: 600 }}>{user?.region}</div></div><div style={{ border: "1px solid #e5e7eb", borderRadius: 8, padding: 12 }}><div style={{ color: "#6b7280", fontSize: 12 }}>الحالة</div><div style={{ fontWeight: 600 }}>{user?.status}</div></div></div>
-
-<h2 style={{ fontSize: 18, fontWeight: 700, margin: "16px 0 8px" }}>فروعي</h2><ul style={{ paddingInlineStart: 18 }}>{(user?.assignments ?? []).map((a) => (<li key={a.id}>{a.branch.name} — {a.branch.city}</li>))}{user?.assignments?.length === 0 && <li>لا توجد فروع معينة</li>}</ul>
-
-<div style={{ marginTop: 16, display: "flex", gap: 10, flexWrap: "wrap" }}><a href="/api/auth/session" target="_blank" style={{ padding: "10px 14px", border: "1px solid #e5e7eb", borderRadius: 8 }}>الجلسة</a><a href="/login" style={{ padding: "10px 14px", border: "1px solid #e5e7eb", borderRadius: 8 }}>تسجيل الدخول</a></div></div>);
+export default async function Index() {const session = await getAuthSession();if (!session) redirect("/login");if ((session.user as any).role === "ADMIN") redirect("/admin");redirect("/me");
 }
