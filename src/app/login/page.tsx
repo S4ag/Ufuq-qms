@@ -1,62 +1,53 @@
-"use client";
+import { redirect } from "next/navigation";
+import { getAuthSession } from "../../lib/auth";
 
-import { signIn } from "next-auth/react";
-import Image from "next/image";
-import { useState } from "react";
+export default async function MePage() {
+const session = await getAuthSession();
+if (!session) redirect("/login");
+if ((session.user as any).role === "ADMIN") redirect("/admin");
 
-export default function LoginPage() {
-const [email, setEmail] = useState("admin@ufuq.local");
-const [password, setPassword] = useState("ChangeMe!123");
-const [loading, setLoading] = useState(false);
-
-const onSubmit = async (e: React.FormEvent) => {
-e.preventDefault();
-setLoading(true);
-await signIn("credentials", {
-redirect: true,
-callbackUrl: "/admin",
-email,
-password
-});
-setLoading(false);
-};
+const u = session.user as any;
 
 return (
-<div style={{ maxWidth: 420, margin: "48px auto", padding: 24, border: "1px solid #e5e7eb", borderRadius: 8 }}>
-<div style={{ textAlign: "center", marginBottom: 16 }}>
-<Image src="/logo.png" alt="UFUQ Official Logo" width={64} height={64} />
-</div>
-<h1 style={{ fontSize: 22, fontWeight: 700, textAlign: "center", marginBottom: 16 }}>تسجيل الدخول</h1>
-<form onSubmit={onSubmit} style={{ display: "grid", gap: 12 }}>
-<input
-value={email}
-onChange={(e)=>setEmail(e.target.value)}
-type="email"
-placeholder="البريد الإلكتروني"
-required
-style={{ padding: 10, border: "1px solid #ddd", borderRadius: 6 }}
-/>
-<input
-value={password}
-onChange={(e)=>setPassword(e.target.value)}
-type="password"
-placeholder="كلمة المرور"
-required
-style={{ padding: 10, border: "1px solid #ddd", borderRadius: 6 }}
-/>
-<button
-disabled={loading}
-type="submit"
-style={{ padding: 12, background: "#2F855A", color: "#fff", border: 0, borderRadius: 6 }}
+<div style={{ padding: 24, fontFamily: "system-ui, sans-serif", lineHeight: 1.6 }}>
+<h1 style={{ fontSize: 22, fontWeight: 700, marginBottom: 12 }}>بياناتي</h1>
+
+<div
+style={{
+display: "grid",
+gap: 12,
+gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
+marginBottom: 16
+}}
 >
-{loading ? "جاري الدخول..." : "دخول"}
-</button>
-</form>
-<div style={{ marginTop: 10, fontSize: 12, color: "#6b7280", textAlign: "center" }}>
-admin@ufuq.local / ChangeMe!123
+<div style={{ border: "1px solid #e5e7eb", borderRadius: 8, padding: 12 }}>
+<div style={{ color: "#6b7280", fontSize: 12 }}>الاسم</div>
+<div style={{ fontWeight: 600 }}>{u?.name}</div>
 </div>
-<div style={{ fontSize: 12, color: "#6b7280", textAlign: "center" }}>
-employee@ufuq.local / ChangeMe!123
+<div style={{ border: "1px solid #e5e7eb", borderRadius: 8, padding: 12 }}>
+<div style={{ color: "#6b7280", fontSize: 12 }}>البريد</div>
+<div style={{ fontWeight: 600 }}>{u?.email}</div>
+</div>
+<div style={{ border: "1px solid #e5e7eb", borderRadius: 8, padding: 12 }}>
+<div style={{ color: "#6b7280", fontSize: 12 }}>الدور</div>
+<div style={{ fontWeight: 600 }}>{u?.role}</div>
+</div>
+<div style={{ border: "1px solid #e5e7eb", borderRadius: 8, padding: 12 }}>
+<div style={{ color: "#6b7280", fontSize: 12 }}>الحالة</div>
+<div style={{ fontWeight: 600 }}>{u?.status}</div>
+</div>
+</div>
+
+<p>تم تسجيل الدخول بنجاح.</p>
+
+<div style={{ marginTop: 16 }}>
+<a
+href="/api/auth/session"
+target="_blank"
+style={{ padding: "10px 14px", border: "1px solid #e5e7eb", borderRadius: 8 }}
+>
+عرض الجلسة
+</a>
 </div>
 </div>
 );
